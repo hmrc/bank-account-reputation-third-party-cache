@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountreputationthirdpartycache.config
+package uk.gov.hmrc.bankaccountreputationthirdpartycache
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ */
 
-@Singleton
-class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) {
+import com.google.inject.AbstractModule
+import play.api.libs.concurrent._
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.ConfirmationOfPayeeCacheRepository
 
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
-
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
+class Module(environment: Environment,
+             playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
+  def configure(): Unit = {
+    bind(classOf[ConfirmationOfPayeeCacheRepository])
+  }
 }

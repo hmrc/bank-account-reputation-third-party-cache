@@ -1,3 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.MicroserviceHelloWorldController.hello
+POST        /confirmation-of-payee             uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.cacheConfirmationOfPayee
+GET         /confirmation-of-payee             uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveConfirmationOfPayee

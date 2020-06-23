@@ -1,5 +1,5 @@
 # Add all the application routes to the app.routes file
 ->         /bank-account-reputation-third-party-cache              app.Routes
-->         /                          health.Routes
+->         /                                                       health.Routes
 
-GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics
+GET        /admin/metrics                                          com.kenshoo.play.metrics.MetricsController.metrics
