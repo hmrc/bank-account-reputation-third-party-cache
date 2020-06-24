@@ -17,7 +17,7 @@
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.ConfirmationOfPayeeCacheRepository
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
@@ -30,10 +30,10 @@ import scala.concurrent.Future
 class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents, repository: ConfirmationOfPayeeCacheRepository)
     extends BackendController(cc) {
 
-  def cacheConfirmationOfPayee(): Action[JsValue] = Action.async(parse.json) { implicit request: Request[JsValue] =>
-    import CacheRequest._
+  def storeConfirmationOfPayee(): Action[JsValue] = Action.async(parse.json) { implicit request: Request[JsValue] =>
+    import StoreRequest._
 
-    Json.fromJson[CacheRequest](request.body).asOpt match {
+    Json.fromJson[StoreRequest](request.body).asOpt match {
       case Some(request) =>
         repository.insert(request.encryptedKey, request.encryptedData).map {
           case writeResult if writeResult.ok ⇒ NoContent
@@ -59,12 +59,17 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents, 
   }
 }
 
-case class CacheRequest(encryptedKey: String, encryptedData: String)
-object CacheRequest {
-  implicit val cacheRequestReads: Reads[CacheRequest] = Json.reads[CacheRequest]
+case class StoreRequest(encryptedKey: String, encryptedData: String)
+object StoreRequest {
+  implicit val storeRequestReads: Reads[StoreRequest] = Json.reads[StoreRequest]
 }
 
 case class RetrieveRequest(encryptedKey: String)
 object RetrieveRequest {
-  implicit val cacheRequestReads: Reads[RetrieveRequest] = Json.reads[RetrieveRequest]
+  implicit val retrieveRequestReads: Reads[RetrieveRequest] = Json.reads[RetrieveRequest]
+}
+
+case class RetrieveResponse(encryptedData: String)
+object RetrieveResponse {
+  implicit val retrieveResponseWrites: Writes[RetrieveResponse] = Json.writes[RetrieveResponse]
 }
