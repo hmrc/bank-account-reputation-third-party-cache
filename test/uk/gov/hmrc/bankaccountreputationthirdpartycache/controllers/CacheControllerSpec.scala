@@ -36,7 +36,7 @@ import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.Future
 
-class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers with OptionValues {
+class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
 
   import scala.concurrent.duration._
 
@@ -46,12 +46,13 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers with 
 
   implicit val timeout: Timeout = Timeout(5.seconds)
 
-  private val rootUri = "/bank-account-reputation-third-party-cache"
+  private val rootUri = "/cache/confirmation-of-payee"
 
-  private val fakeRetrieveRequest = FakeRequest("POST", rootUri + "/cache/confirmation-of-payee/retrieve",
-    headers = Headers(("Content-Type", "application/json")), body = Json.parse("""{"encryptedKey": "blah"}"""))
+  private val fakeRetrieveRequest = FakeRequest("POST", rootUri + "/retrieve",
+    headers = Headers(("Content-Type", "application/json")),
+    body = Json.parse("""{"encryptedKey": "blah"}"""))
 
-  private val fakeStoreRequest = FakeRequest("POST", rootUri + "/cache/confirmation-of-payee/store",
+  private val fakeStoreRequest = FakeRequest("POST", rootUri + "/store",
     headers = Headers(("Content-Type", "application/json")),
     body = Json.parse("""{"encryptedKey": "blah","encryptedData": "blah blah"}"""))
 
@@ -66,8 +67,11 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers with 
     "return Ok(200) and the value" in {
       val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
       when(mockRepository.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
+
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
+
       val result = controller.retrieveConfirmationOfPayee()(fakeRetrieveRequest)
+
       Helpers.status(result) shouldBe Status.OK
       Helpers.contentAsString(result) shouldBe """{"encryptedData":"some_data"}"""
       Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
@@ -76,9 +80,11 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers with 
     "return NotFound(404) when key not found in cache" in {
       val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
       when(mockRepository.findByRequest(any())(any())).thenReturn(Future.successful(None))
+
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
 
       val result = controller.retrieveConfirmationOfPayee()(fakeRetrieveRequest)
+
       Helpers.status(result) shouldBe Status.NOT_FOUND
       Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
     }
@@ -88,10 +94,14 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers with 
     "return Ok(200) and cache the key and data" in {
       val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
       val mockWriteResult = mock[WriteResult]
+
       when(mockWriteResult.ok).thenReturn(true)
       when(mockRepository.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
+
       val result = controller.storeConfirmationOfPayee()(fakeStoreRequest)
+
       Helpers.status(result) shouldBe Status.OK
       Helpers.contentAsString(result) shouldBe """{"stored":true}"""
       Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
