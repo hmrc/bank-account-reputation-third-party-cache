@@ -1,4 +1,4 @@
 # microservice specific routes
 
-POST        /confirmation-of-payee             uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.cacheConfirmationOfPayee
-GET         /confirmation-of-payee             uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveConfirmationOfPayee
+POST        /cache/confirmation-of-payee             uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.cacheConfirmationOfPayee
+GET         /cache/confirmation-of-payee             uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveConfirmationOfPayee

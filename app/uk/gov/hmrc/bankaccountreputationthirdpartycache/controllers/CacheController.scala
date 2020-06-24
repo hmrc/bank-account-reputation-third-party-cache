@@ -51,7 +51,7 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents, 
       case Some(request) =>
         repository.findByRequest(request.encryptedKey).map {
           case Some(encryptedData) ⇒ Ok(encryptedData)
-          case _ ⇒ InternalServerError("Could not retrieve cached data")
+          case _ ⇒ NotFound("Could not retrieve cached data")
         }
       case _ ⇒
         Future.successful(BadRequest("Retrieve request was not valid"))

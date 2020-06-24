@@ -46,9 +46,9 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
   implicit val timeout: Timeout = Timeout(5.seconds)
 
   private val rootUri = "/bank-account-reputation-third-party-cache"
-  private val fakeGetRequest = FakeRequest("GET", rootUri + "/confirmation-of-payee/", headers = Headers(("Content-Type","application/json")), body = Json.parse("""{"encryptedKey": "blah"}"""))
+  private val fakeGetRequest = FakeRequest("GET", rootUri + "/cache/confirmation-of-payee/", headers = Headers(("Content-Type","application/json")), body = Json.parse("""{"encryptedKey": "blah"}"""))
 
-  private val fakePutRequest = FakeRequest("POST", rootUri + "/confirmation-of-payee/", headers = Headers(("Content-Type","application/json")), body = Json.parse("""{"encryptedKey": "blah","encryptedData": "blah blah"}"""))
+  private val fakePutRequest = FakeRequest("POST", rootUri + "/cache/confirmation-of-payee/", headers = Headers(("Content-Type","application/json")), body = Json.parse("""{"encryptedKey": "blah","encryptedData": "blah blah"}"""))
 
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
@@ -58,7 +58,7 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
 
 
   "GET /" should {
-    "return 200 and the value" in {
+    "return Ok(200) and the value" in {
       val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
       when(mockRepository.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
@@ -66,10 +66,19 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
       Helpers.status(result) shouldBe Status.OK
       Helpers.contentAsString(result) shouldBe "some_data"
     }
+
+    "return NotFound(404) when key not found in cache" in {
+      val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
+      when(mockRepository.findByRequest(any())(any())).thenReturn(Future.successful(None))
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
+
+      val result = controller.retrieveConfirmationOfPayee()(fakeGetRequest)
+      Helpers.status(result) shouldBe Status.NOT_FOUND
+    }
   }
 
   "POST cache" should {
-    "return 200 and cache the key and data" in {
+    "return Ok(200) and cache the key and data" in {
       val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
       val mockWriteResult = mock[WriteResult]
       when(mockWriteResult.ok).thenReturn(true)
