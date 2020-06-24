@@ -17,11 +17,12 @@
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.MediaTypes
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.Timeout
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{Matchers, OptionValues, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.libs.json.Json
@@ -35,7 +36,7 @@ import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.Future
 
-class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
+class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers with OptionValues {
 
   import scala.concurrent.duration._
 
@@ -68,7 +69,8 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
       val result = controller.retrieveConfirmationOfPayee()(fakeRetrieveRequest)
       Helpers.status(result) shouldBe Status.OK
-      Helpers.contentAsString(result) shouldBe "some_data"
+      Helpers.contentAsString(result) shouldBe """{"encryptedData":"some_data"}"""
+      Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
     }
 
     "return NotFound(404) when key not found in cache" in {
@@ -78,6 +80,7 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
 
       val result = controller.retrieveConfirmationOfPayee()(fakeRetrieveRequest)
       Helpers.status(result) shouldBe Status.NOT_FOUND
+      Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
     }
   }
 
@@ -89,7 +92,9 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
       when(mockRepository.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
       val result = controller.storeConfirmationOfPayee()(fakeStoreRequest)
-      Helpers.status(result) shouldBe Status.NO_CONTENT
+      Helpers.status(result) shouldBe Status.OK
+      Helpers.contentAsString(result) shouldBe """{"stored":true}"""
+      Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
     }
   }
 }

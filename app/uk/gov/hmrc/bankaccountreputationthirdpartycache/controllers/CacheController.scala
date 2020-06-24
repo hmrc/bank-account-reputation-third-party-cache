@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
+import akka.http.scaladsl.model.MediaTypes
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -32,29 +33,47 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents, 
 
   def storeConfirmationOfPayee(): Action[JsValue] = Action.async(parse.json) { implicit request: Request[JsValue] =>
     import StoreRequest._
+    import StoreResponse._
 
     Json.fromJson[StoreRequest](request.body).asOpt match {
       case Some(request) =>
         repository.insert(request.encryptedKey, request.encryptedData).map {
-          case writeResult if writeResult.ok ⇒ NoContent
-          case _ ⇒ InternalServerError("Could not cache the data")
+          case writeResult if writeResult.ok ⇒ Ok(Json.toJson(
+            StoreResponse(stored = true, description =  None))
+          ).as(MediaTypes.`application/json`.value)
+          case _ ⇒ InternalServerError(Json.toJson(
+            StoreResponse(stored = false, description =  Some("Could not cache the data")))
+          ).as(MediaTypes.`application/json`.value)
         }
       case None ⇒
-        Future.successful(BadRequest("Cache request was not valid"))
+        Future.successful(BadRequest(Json.toJson(
+          StoreResponse(stored = false, description =  Some("Cache request was not valid")))
+        ).as(MediaTypes.`application/json`.value)
+        )
       }
   }
 
   def retrieveConfirmationOfPayee(): Action[JsValue] = Action.async(parse.json) { implicit request: Request[JsValue] =>
     import RetrieveRequest._
+    import RetrieveResponse._
 
     Json.fromJson[RetrieveRequest](request.body).asOpt match {
       case Some(request) =>
         repository.findByRequest(request.encryptedKey).map {
-          case Some(encryptedData) ⇒ Ok(encryptedData)
-          case _ ⇒ NotFound("Could not retrieve cached data")
+          case Some(encryptedData) ⇒
+            Ok(Json.toJson(
+              RetrieveResponse(encryptedData = Some(encryptedData), description = None))
+            ).as(MediaTypes.`application/json`.value)
+          case _ ⇒
+            NotFound(Json.toJson(
+              RetrieveResponse(encryptedData = None, description = Some("Could not find data for given key")))
+            ).as(MediaTypes.`application/json`.value)
         }
       case _ ⇒
-        Future.successful(BadRequest("Retrieve request was not valid"))
+        Future.successful(
+          BadRequest(Json.toJson(
+            RetrieveResponse(encryptedData = None, description = Some("Retrieve request was not valid")))
+          ).as(MediaTypes.`application/json`.value))
     }
   }
 }
@@ -64,12 +83,17 @@ object StoreRequest {
   implicit val storeRequestReads: Reads[StoreRequest] = Json.reads[StoreRequest]
 }
 
+case class StoreResponse(stored: Boolean, description: Option[String])
+object StoreResponse {
+  implicit val retrieveResponseWrites: Writes[StoreResponse] = Json.writes[StoreResponse]
+}
+
 case class RetrieveRequest(encryptedKey: String)
 object RetrieveRequest {
   implicit val retrieveRequestReads: Reads[RetrieveRequest] = Json.reads[RetrieveRequest]
 }
 
-case class RetrieveResponse(encryptedData: String)
+case class RetrieveResponse(encryptedData: Option[String], description: Option[String])
 object RetrieveResponse {
   implicit val retrieveResponseWrites: Writes[RetrieveResponse] = Json.writes[RetrieveResponse]
 }
