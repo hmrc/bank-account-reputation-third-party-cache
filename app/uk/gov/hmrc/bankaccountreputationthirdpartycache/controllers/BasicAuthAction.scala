@@ -15,7 +15,8 @@
  */
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
-import play.api.libs.json.JsValue
+import java.util.Base64
+
 import play.api.mvc.{BodyParser, _}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,7 +35,7 @@ class BasicAuthAction[B](username: String, password: String)(val parser: BodyPar
 
   private [this] def decodeBasicAuth(authHeader: String): (String, String) = {
     val baStr = authHeader.replaceFirst("Basic ", "")
-    val decoded = new sun.misc.BASE64Decoder().decodeBuffer(baStr)
+    val decoded = Base64.getDecoder.decode(baStr)
     val Array(user, password) = new String(decoded).split(":")
     (user, password)
   }
