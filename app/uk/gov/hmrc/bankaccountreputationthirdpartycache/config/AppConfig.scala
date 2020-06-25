@@ -29,4 +29,5 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
 
   val surepayCacheItemExpiryDays: Int = config.get[Int]("mongodb.surepay.cacheItemExpiryDays")
+  val basicAuthToken: String = config.get[String]("basicAuth.token")
 }

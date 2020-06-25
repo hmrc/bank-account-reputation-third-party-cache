@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
+import java.nio.charset.StandardCharsets
+import java.util.Base64
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.MediaTypes
 import akka.stream.{ActorMaterializer, Materializer}
@@ -32,6 +35,7 @@ import play.api.{Configuration, Environment, Mode}
 import reactivemongo.api.commands.WriteResult
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.ConfirmationOfPayeeCacheRepository
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
+import uk.gov.hmrc.http.HeaderNames
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.Future
@@ -46,12 +50,14 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
 
   implicit val timeout: Timeout = Timeout(5.seconds)
 
+  val auth: String = Base64.getEncoder.encodeToString(s"bars:token".getBytes(StandardCharsets.UTF_8))
+
   private val fakeRetrieveRequest = FakeRequest("POST", "/retrieve",
-    headers = Headers(("Content-Type", "application/json")),
+    headers = Headers(("Content-Type", "application/json"), HeaderNames.authorisation -> s"Basic $auth"),
     body = Json.parse("""{"encryptedKey": "blah"}"""))
 
   private val fakeStoreRequest = FakeRequest("POST", "/store",
-    headers = Headers(("Content-Type", "application/json")),
+    headers = Headers(("Content-Type", "application/json"), HeaderNames.authorisation -> s"Basic $auth"),
     body = Json.parse("""{"encryptedKey": "blah","encryptedData": "blah blah"}"""))
 
   private val env = Environment.simple()

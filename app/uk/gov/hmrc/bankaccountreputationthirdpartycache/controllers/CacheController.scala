@@ -31,7 +31,9 @@ import scala.concurrent.Future
 class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents, repository: ConfirmationOfPayeeCacheRepository)
     extends BackendController(cc) {
 
-  def storeConfirmationOfPayee(): Action[JsValue] = Action.async(parse.json) { implicit request: Request[JsValue] =>
+  private val WithBasicAuth = new BasicAuthAction[JsValue]("bars", appConfig.basicAuthToken)(parse.json)
+
+  def storeConfirmationOfPayee(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
     import StoreRequest._
     import StoreResponse._
 
@@ -53,7 +55,7 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents, 
       }
   }
 
-  def retrieveConfirmationOfPayee(): Action[JsValue] = Action.async(parse.json) { implicit request: Request[JsValue] =>
+  def retrieveConfirmationOfPayee(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
     import RetrieveRequest._
     import RetrieveResponse._
 
