@@ -24,13 +24,15 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ConfirmationOfPayeeCacheRepository @Inject()(component: ReactiveMongoComponent)
+class ConfirmationOfPayeeCacheRepository @Inject()(appConfig: AppConfig, component: ReactiveMongoComponent)
   extends ReactiveRepository[EncryptedCacheEntry, BSONObjectID]("confirmation-of-payee-cache", component.mongoConnector.db, EncryptedCacheEntry.mongoCacheFormat) {
 
+  val expiryDays: Int = appConfig.surepayCacheItemExpiryDays
   val expireAfterSeconds: Long = 0
 
   private lazy val ExpiryDateIndex = "expiryDateIndex"
@@ -61,7 +63,7 @@ class ConfirmationOfPayeeCacheRepository @Inject()(component: ReactiveMongoCompo
   }
 
   def insert(encryptedKey: String, encryptedData: String)(implicit ec: ExecutionContext): Future[WriteResult] =
-    insert(encryptedKey, encryptedData, 7) //TODO: Make in to config
+    insert(encryptedKey, encryptedData, expiryDays)
 
   protected[cache] def insert(encryptedKey: String, encryptedData: String, expiryDays: Int)(implicit ec: ExecutionContext): Future[WriteResult] =
     collection.insert(
