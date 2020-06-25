@@ -46,6 +46,11 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents, 
           case _ ⇒ InternalServerError(Json.toJson(
             StoreResponse(stored = false, description =  Some("Could not cache the data")))
           ).as(MediaTypes.`application/json`.value)
+        }.recoverWith{
+          case _ ⇒
+            Future.successful(InternalServerError(Json.toJson(
+            StoreResponse(stored = false, description =  Some("Error inserting cache data.")))
+          ).as(MediaTypes.`application/json`.value))
         }
       case None ⇒
         Future.successful(BadRequest(Json.toJson(
@@ -70,6 +75,11 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents, 
             NotFound(Json.toJson(
               RetrieveResponse(encryptedData = None, description = Some("Could not find data for given key")))
             ).as(MediaTypes.`application/json`.value)
+        }.recoverWith{
+          case _ ⇒
+            Future.successful(InternalServerError(Json.toJson(
+              StoreResponse(stored = false, description =  Some("Error retrieving cache data.")))
+            ).as(MediaTypes.`application/json`.value))
         }
       case _ ⇒
         Future.successful(
