@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 
-class ConfirmationOfPayeeCacheRepository @Inject()(appConfig: AppConfig, component: ReactiveMongoComponent)
-  extends CacheRepository(component, "confirmation-of-payee-cache") {
-  val expiryDays: Int = appConfig.surepayCacheItemExpiryDays
+class CallValidateCacheRepository @Inject()(appConfig: AppConfig, component: ReactiveMongoComponent)
+  extends CacheRepository(component, "call-validate-cache") {
+  val expiryDays: Int = appConfig.transunionCacheItemExpiryDays
 }
