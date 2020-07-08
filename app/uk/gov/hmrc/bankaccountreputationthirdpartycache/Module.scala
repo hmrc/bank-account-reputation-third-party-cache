@@ -28,7 +28,7 @@ import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CallValidateCache
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 
 class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bind(classOf[AppConfig])
     bind(classOf[ConfirmationOfPayeeCacheRepository])
     bind(classOf[CallValidateCacheRepository])

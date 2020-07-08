@@ -31,12 +31,12 @@ import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.mvc.{Headers, Result}
 import play.api.test.{FakeRequest, Helpers}
-import play.api.{Configuration, Environment, Mode}
+import play.api.{Configuration, Environment}
 import reactivemongo.api.commands.WriteResult
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CallValidateCacheRepository, ConfirmationOfPayeeCacheRepository, CreditSafeCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.http.HeaderNames
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.Future
 
@@ -63,7 +63,7 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
 
-  private val serviceConfig = new ServicesConfig(configuration, new RunMode(configuration, Mode.Dev))
+  private val serviceConfig = new ServicesConfig(configuration)
   private val appConfig = new AppConfig(configuration, serviceConfig)
 
   "POST /confirmation-of-payee/retrieve" should {
