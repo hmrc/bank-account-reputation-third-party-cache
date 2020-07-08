@@ -21,13 +21,14 @@ import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.util.Random
 
-class ConfirmationOfPayeeCacheRepositoryTest extends WordSpec
+class CacheRepositoryTest extends WordSpec
   with Matchers
   with MongoSpecSupport
   with ScalaFutures
@@ -45,7 +46,10 @@ class ConfirmationOfPayeeCacheRepositoryTest extends WordSpec
       )
       .build()
 
-  val mongoRepo: ConfirmationOfPayeeCacheRepository = app.injector.instanceOf(classOf[ConfirmationOfPayeeCacheRepository])
+  val mongoComponent = app.injector.instanceOf[ReactiveMongoComponent]
+  val mongoRepo: CacheRepository = new CacheRepository(mongoComponent, "test-cache") {
+    override def expiryDays: Int = 0
+  }
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -68,7 +72,7 @@ class ConfirmationOfPayeeCacheRepositoryTest extends WordSpec
       val request = Random.nextString(10)
       val response = "true, None, None"
 
-      mongoRepo.insert(request, response, 0).futureValue
+      mongoRepo.insert(request, response).futureValue
 
       val cachedValue = mongoRepo.findByRequest(request).futureValue
       cachedValue shouldBe Some(response)

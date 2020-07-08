@@ -25,18 +25,18 @@ import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.Timeout
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.{Matchers, OptionValues, WordSpec}
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.mvc.Headers
+import play.api.mvc.{Headers, Result}
 import play.api.test.{FakeRequest, Helpers}
-import play.api.{Configuration, Environment, Mode}
+import play.api.{Configuration, Environment}
 import reactivemongo.api.commands.WriteResult
-import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.ConfirmationOfPayeeCacheRepository
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CallValidateCacheRepository, ConfirmationOfPayeeCacheRepository, CreditSafeCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.http.HeaderNames
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.Future
 
@@ -63,52 +63,120 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)
 
-  private val serviceConfig = new ServicesConfig(configuration, new RunMode(configuration, Mode.Dev))
+  private val serviceConfig = new ServicesConfig(configuration)
   private val appConfig = new AppConfig(configuration, serviceConfig)
 
+  "POST /confirmation-of-payee/retrieve" should {
+    "return Ok(200) and the value" in new Setup() {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
 
-  "POST /retrieve" should {
-    "return Ok(200) and the value" in {
-      val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
-      when(mockRepository.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
+      when(cp.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
 
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
+      assertRetrieveResult(controller.retrieveConfirmationOfPayee()(fakeRetrieveRequest))
+    }
 
-      val result = controller.retrieveConfirmationOfPayee()(fakeRetrieveRequest)
+    "return NotFound(404) when key not found in cache" in new Setup {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
 
+      when(cp.findByRequest(any())(any())).thenReturn(Future.successful(None))
+
+      assertRetrieve404(controller.retrieveConfirmationOfPayee()(fakeRetrieveRequest))
+    }
+  }
+
+  "POST /confirmation-of-payee/store" should {
+    "return Ok(200) and cache the key and data" in new Setup {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
+
+      val mockWriteResult: WriteResult = mock[WriteResult]
+      when(mockWriteResult.ok).thenReturn(true)
+      when(cp.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+
+      assertStoreResult(controller.storeConfirmationOfPayee()(fakeStoreRequest))
+    }
+  }
+
+  "POST /call-validate/retrieve" should {
+    "return Ok(200) and the value" in new Setup() {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
+
+      when(cv.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
+
+      assertRetrieveResult(controller.retrieveCallValidate()(fakeRetrieveRequest))
+    }
+
+    "return NotFound(404) when key not found in cache" in new Setup {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
+
+      when(cv.findByRequest(any())(any())).thenReturn(Future.successful(None))
+
+      assertRetrieve404(controller.retrieveCallValidate()(fakeRetrieveRequest))
+    }
+  }
+
+  "POST /call-validate/store" should {
+    "return Ok(200) and cache the key and data" in new Setup {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
+
+      val mockWriteResult: WriteResult = mock[WriteResult]
+      when(mockWriteResult.ok).thenReturn(true)
+      when(cv.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+
+      assertStoreResult(controller.storeCallValidate()(fakeStoreRequest))
+    }
+  }
+
+  "POST /credit-safe/retrieve" should {
+    "return Ok(200) and the value" in new Setup() {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
+
+      when(cs.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
+
+      assertRetrieveResult(controller.retrieveCreditSafe()(fakeRetrieveRequest))
+    }
+
+    "return NotFound(404) when key not found in cache" in new Setup {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
+
+      when(cs.findByRequest(any())(any())).thenReturn(Future.successful(None))
+
+      assertRetrieve404(controller.retrieveCreditSafe()(fakeRetrieveRequest))
+    }
+  }
+
+  "POST /credit-safe/store" should {
+    "return Ok(200) and cache the key and data" in new Setup {
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cp, cv, cs)
+
+      val mockWriteResult: WriteResult = mock[WriteResult]
+      when(mockWriteResult.ok).thenReturn(true)
+      when(cs.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+
+      assertStoreResult(controller.storeCreditSafe()(fakeStoreRequest))
+    }
+  }
+
+  trait Setup {
+    val cp: ConfirmationOfPayeeCacheRepository = mock[ConfirmationOfPayeeCacheRepository]
+    val cv: CallValidateCacheRepository = mock[CallValidateCacheRepository]
+    val cs: CreditSafeCacheRepository = mock[CreditSafeCacheRepository]
+
+    def assertRetrieveResult(result: Future[Result]): Unit = {
       Helpers.status(result) shouldBe Status.OK
       Helpers.contentAsString(result) shouldBe """{"encryptedData":"some_data"}"""
       Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
     }
 
-    "return NotFound(404) when key not found in cache" in {
-      val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
-      when(mockRepository.findByRequest(any())(any())).thenReturn(Future.successful(None))
-
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
-
-      val result = controller.retrieveConfirmationOfPayee()(fakeRetrieveRequest)
-
+    def assertRetrieve404(result: Future[Result]): Unit = {
       Helpers.status(result) shouldBe Status.NOT_FOUND
       Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
     }
-  }
 
-  "POST store" should {
-    "return Ok(200) and cache the key and data" in {
-      val mockRepository = mock[ConfirmationOfPayeeCacheRepository]
-      val mockWriteResult = mock[WriteResult]
-
-      when(mockWriteResult.ok).thenReturn(true)
-      when(mockRepository.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
-
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), mockRepository)
-
-      val result = controller.storeConfirmationOfPayee()(fakeStoreRequest)
-
+    def assertStoreResult(result: Future[Result]): Unit = {
       Helpers.status(result) shouldBe Status.OK
       Helpers.contentAsString(result) shouldBe """{"stored":true}"""
       Helpers.contentType(result) shouldBe Some(MediaTypes.`application/json`.value)
     }
   }
+
 }

@@ -24,12 +24,14 @@ package uk.gov.hmrc.bankaccountreputationthirdpartycache
 import com.google.inject.AbstractModule
 import play.api.libs.concurrent._
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.ConfirmationOfPayeeCacheRepository
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CallValidateCacheRepository, ConfirmationOfPayeeCacheRepository, CreditSafeCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 
 class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bind(classOf[AppConfig])
     bind(classOf[ConfirmationOfPayeeCacheRepository])
+    bind(classOf[CallValidateCacheRepository])
+    bind(classOf[CreditSafeCacheRepository])
   }
 }
