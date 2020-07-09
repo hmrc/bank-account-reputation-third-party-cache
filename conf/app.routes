@@ -1,8 +1,10 @@
 # microservice specific routes
 
-POST        /confirmation-of-payee/store           uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeConfirmationOfPayee
-POST        /confirmation-of-payee/retrieve        uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveConfirmationOfPayee
-POST        /call-validate/store                   uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeCallValidate
-POST        /call-validate/retrieve                uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveCallValidate
-POST        /credit-safe/store                     uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeCreditSafe
-POST        /credit-safe/retrieve                  uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveCreditSafe
+POST        /confirmation-of-payee/business/store           uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeConfirmationOfPayeeBusiness
+POST        /confirmation-of-payee/business/retrieve        uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveConfirmationOfPayeeBusiness
+POST        /confirmation-of-payee/personal/store           uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeConfirmationOfPayeePersonal
+POST        /confirmation-of-payee/personal/retrieve        uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveConfirmationOfPayeePersonal
+POST        /call-validate/store                            uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeCallValidate
+POST        /call-validate/retrieve                         uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveCallValidate
+POST        /credit-safe/store                              uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeCreditSafe
+POST        /credit-safe/retrieve                           uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveCreditSafe

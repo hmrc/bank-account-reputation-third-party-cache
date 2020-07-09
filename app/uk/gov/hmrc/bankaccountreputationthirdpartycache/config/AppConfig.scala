@@ -28,7 +28,8 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
 
-  val surepayCacheItemExpiryDays: Int = config.get[Int]("mongodb.surepay.cacheItemExpiryDays")
+  val surepayBusinessCacheItemExpiryDays: Int = config.get[Int]("mongodb.surepay.business.cacheItemExpiryDays")
+  val surepayPersonalCacheItemExpiryDays: Int = config.get[Int]("mongodb.surepay.personal.cacheItemExpiryDays")
   val transunionCacheItemExpiryDays: Int = config.get[Int]("mongodb.transunion.cacheItemExpiryDays")
   val creditSafeCacheItemExpiryDays: Int = config.get[Int]("mongodb.creditsafe.cacheItemExpiryDays")
 

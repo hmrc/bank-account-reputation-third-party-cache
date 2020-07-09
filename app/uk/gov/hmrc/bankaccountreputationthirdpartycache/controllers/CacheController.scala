@@ -20,7 +20,7 @@ import akka.http.scaladsl.model.MediaTypes
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
-import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, CallValidateCacheRepository, ConfirmationOfPayeeCacheRepository, CreditSafeCacheRepository}
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository, CreditSafeCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
@@ -29,19 +29,28 @@ import scala.concurrent.Future
 
 @Singleton()
 class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
-                                confirmationOfPayeeCacheRepository: ConfirmationOfPayeeCacheRepository,
+                                confirmationOfPayeeBusinessCacheRepository: ConfirmationOfPayeeBusinessCacheRepository,
+                                confirmationOfPayeePersonalCacheRepository: ConfirmationOfPayeePersonalCacheRepository,
                                 callValidateCacheRepository: CallValidateCacheRepository,
                                 creditSafeCacheRepository: CreditSafeCacheRepository)
   extends BackendController(cc) {
 
   private def WithBasicAuth = new BasicAuthAction[JsValue]("bars", appConfig.basicAuthToken)(parse.json)
 
-  def storeConfirmationOfPayee(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
-    store(request, confirmationOfPayeeCacheRepository)
+  def storeConfirmationOfPayeeBusiness(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
+    store(request, confirmationOfPayeeBusinessCacheRepository)
   }
 
-  def retrieveConfirmationOfPayee(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
-    retrieve(request, confirmationOfPayeeCacheRepository)
+  def retrieveConfirmationOfPayeeBusiness(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
+    retrieve(request, confirmationOfPayeeBusinessCacheRepository)
+  }
+
+  def storeConfirmationOfPayeePersonal(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
+    store(request, confirmationOfPayeePersonalCacheRepository)
+  }
+
+  def retrieveConfirmationOfPayeePersonal(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
+    retrieve(request, confirmationOfPayeePersonalCacheRepository)
   }
 
   def storeCallValidate(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
