@@ -17,10 +17,11 @@
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
 import javax.inject.Inject
-import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
+import uk.gov.hmrc.mongo.MongoComponent
 
-class ConfirmationOfPayeeBusinessCacheRepository @Inject()(appConfig: AppConfig, component: ReactiveMongoComponent)
-  extends CacheRepository(component, "confirmation-of-payee-business-cache") {
-  val expiryDays: Int = appConfig.surepayBusinessCacheItemExpiryDays
+import scala.concurrent.ExecutionContext
+
+class ConfirmationOfPayeeBusinessCacheRepository @Inject()(appConfig: AppConfig, component: MongoComponent)(implicit ec: ExecutionContext)
+  extends CacheRepository(component, "confirmation-of-payee-business-cache", appConfig.surepayBusinessCacheItemExpiryDays) {
 }

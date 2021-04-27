@@ -17,10 +17,11 @@
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
 import javax.inject.Inject
-import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
+import uk.gov.hmrc.mongo.MongoComponent
 
-class CreditSafeCacheRepository @Inject()(appConfig: AppConfig, component: ReactiveMongoComponent)
-  extends CacheRepository(component, "credit-safe-cache") {
-  val expiryDays: Int = appConfig.creditSafeCacheItemExpiryDays
+import scala.concurrent.ExecutionContext
+
+class CreditSafeCacheRepository @Inject()(appConfig: AppConfig, component: MongoComponent)(implicit ec: ExecutionContext)
+  extends CacheRepository(component, "credit-safe-cache", appConfig.creditSafeCacheItemExpiryDays) {
 }

@@ -16,27 +16,29 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
+import org.mongodb.scala.bson.collection.immutable.Document
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.mongo.MongoSpecSupport
+import uk.gov.hmrc.mongo.MongoComponent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.util.Random
 
-class CacheRepositoryTest extends WordSpec
+class CacheRepositoryTest extends AnyWordSpec
   with Matchers
-  with MongoSpecSupport
   with ScalaFutures
   with BeforeAndAfterEach
   with GuiceOneAppPerSuite
   with Eventually {
 
-  override implicit val patienceConfig = PatienceConfig(timeout = 5.seconds, interval = 100.millis)
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = 5.seconds, interval = 100.millis)
 
   implicit override lazy val app: Application =
     new GuiceApplicationBuilder()
@@ -46,14 +48,12 @@ class CacheRepositoryTest extends WordSpec
       )
       .build()
 
-  val mongoComponent = app.injector.instanceOf[ReactiveMongoComponent]
-  val mongoRepo: CacheRepository = new CacheRepository(mongoComponent, "test-cache") {
-    override def expiryDays: Int = 0
-  }
+  val mongoComponent: MongoComponent = app.injector.instanceOf[MongoComponent]
+  val mongoRepo: CacheRepository = new CacheRepository(mongoComponent, "test-cache", expiryDays = 0) {}
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    mongoRepo.removeAll().futureValue
+    mongoRepo.collection.deleteMany(Document()).toFuture().futureValue
   }
 
   "Caching Repository" should {
