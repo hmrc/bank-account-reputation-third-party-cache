@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
 import javax.inject.Inject
-import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
+import uk.gov.hmrc.mongo.MongoComponent
 
-class CallValidateCacheRepository @Inject()(appConfig: AppConfig, component: ReactiveMongoComponent)
+import scala.concurrent.ExecutionContext
+
+class CallValidateCacheRepository @Inject()(appConfig: AppConfig, component: MongoComponent)(implicit ec: ExecutionContext)
   extends CacheRepository(component, "call-validate-cache") {
   val expiryDays: Int = appConfig.transunionCacheItemExpiryDays
 }

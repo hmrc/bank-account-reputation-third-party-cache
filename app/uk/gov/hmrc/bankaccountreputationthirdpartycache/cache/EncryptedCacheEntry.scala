@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,25 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
-import java.time.{Instant, ZoneOffset, ZonedDateTime}
+import java.time.LocalDateTime
 
+import org.bson.types.ObjectId
 import play.api.libs.json._
-import reactivemongo.bson.BSONObjectID
 
-case class EncryptedCacheEntry(id: BSONObjectID,
+case class EncryptedCacheEntry(id: ObjectId,
                                key: String,
                                data: String,
-                               expiryDate: ZonedDateTime)
+                               expiryDate: LocalDateTime)
 
 object EncryptedCacheEntry {
 
-  import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+  import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 
   final val DATA_ATTRIBUTE_NAME = "data"
 
-  implicit val format = ReactiveMongoFormats.objectIdFormats
+  implicit val format: Format[ObjectId] = MongoFormats.objectIdFormat
+  implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
 
-  implicit val localDateTimeRead: Reads[ZonedDateTime] =
-    (__ \ "$date").read[Long].map { dateTime =>
-      ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneOffset.UTC)
-    }
-
-  implicit val localDateTimeWrite: Writes[ZonedDateTime] = new Writes[ZonedDateTime] {
-    def writes(dateTime: ZonedDateTime): JsValue = Json.obj(
-      "$date" -> dateTime.toInstant.toEpochMilli
-    )
-  }
-
-  implicit val datetimeFormat: Format[ZonedDateTime] = Format(localDateTimeRead, localDateTimeWrite)
-  implicit val cacheFormat = Json.format[EncryptedCacheEntry]
-  implicit val mongoCacheFormat = ReactiveMongoFormats.mongoEntity(cacheFormat)
+  implicit val cacheFormat: OFormat[EncryptedCacheEntry] = Json.format[EncryptedCacheEntry]
+  implicit val mongoCacheFormat: Format[EncryptedCacheEntry] = MongoFormats.mongoEntity(cacheFormat)
 }

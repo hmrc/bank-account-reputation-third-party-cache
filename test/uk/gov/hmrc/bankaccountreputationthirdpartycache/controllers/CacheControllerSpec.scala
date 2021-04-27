@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,17 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.MediaTypes
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.Timeout
-import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.{Matchers, WordSpec}
+import org.mockito.ArgumentMatchers._
+import org.mongodb.scala.result.InsertOneResult
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.mvc.{Headers, Result}
 import play.api.test.{FakeRequest, Helpers}
 import play.api.{Configuration, Environment}
-import reactivemongo.api.commands.WriteResult
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository, CreditSafeCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.http.HeaderNames
@@ -40,7 +41,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.Future
 
-class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
+class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
   import scala.concurrent.duration._
 
@@ -88,8 +89,8 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
     "return Ok(200) and cache the key and data" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv, cs)
 
-      val mockWriteResult: WriteResult = mock[WriteResult]
-      when(mockWriteResult.ok).thenReturn(true)
+      val mockWriteResult: InsertOneResult = mock[InsertOneResult]
+      when(mockWriteResult.wasAcknowledged()).thenReturn(true)
       when(cpp.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeConfirmationOfPayeePersonal()(fakeStoreRequest))
@@ -118,8 +119,8 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
     "return Ok(200) and cache the key and data" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv, cs)
 
-      val mockWriteResult: WriteResult = mock[WriteResult]
-      when(mockWriteResult.ok).thenReturn(true)
+      val mockWriteResult: InsertOneResult = mock[InsertOneResult]
+      when(mockWriteResult.wasAcknowledged()).thenReturn(true)
       when(cpb.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeConfirmationOfPayeeBusiness()(fakeStoreRequest))
@@ -148,8 +149,8 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
     "return Ok(200) and cache the key and data" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv, cs)
 
-      val mockWriteResult: WriteResult = mock[WriteResult]
-      when(mockWriteResult.ok).thenReturn(true)
+      val mockWriteResult: InsertOneResult = mock[InsertOneResult]
+      when(mockWriteResult.wasAcknowledged()).thenReturn(true)
       when(cv.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeCallValidate()(fakeStoreRequest))
@@ -178,8 +179,8 @@ class CacheControllerSpec extends WordSpec with MockitoSugar with Matchers {
     "return Ok(200) and cache the key and data" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv, cs)
 
-      val mockWriteResult: WriteResult = mock[WriteResult]
-      when(mockWriteResult.ok).thenReturn(true)
+      val mockWriteResult: InsertOneResult = mock[InsertOneResult]
+      when(mockWriteResult.wasAcknowledged()).thenReturn(true)
       when(cs.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeCreditSafe()(fakeStoreRequest))
