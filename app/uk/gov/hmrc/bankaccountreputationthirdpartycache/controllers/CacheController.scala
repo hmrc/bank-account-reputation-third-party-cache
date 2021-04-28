@@ -76,7 +76,7 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
     Json.fromJson[StoreRequest](request.body).asOpt match {
       case Some(request) =>
         repository.insert(request.encryptedKey, request.encryptedData).map {
-          case writeResult if writeResult.ok ⇒ Ok(Json.toJson(
+          case result if result.wasAcknowledged() ⇒ Ok(Json.toJson(
             StoreResponse(stored = true, description = None))
           ).as(MediaTypes.`application/json`.value)
           case _ ⇒ InternalServerError(Json.toJson(

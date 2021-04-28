@@ -16,80 +16,42 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
-import java.time.{ZoneOffset, ZonedDateTime}
+import java.time.{LocalDateTime, ZoneOffset, ZonedDateTime}
+import java.util.concurrent.TimeUnit
 
 import javax.inject.Inject
-import play.api.Logger
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
-import uk.gov.hmrc.mongo.ReactiveRepository
+import org.bson.types.ObjectId
+import org.mongodb.scala._
+import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import org.mongodb.scala.result.InsertOneResult
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class CacheRepository @Inject()(component: ReactiveMongoComponent, collectionName: String)
-  extends ReactiveRepository[EncryptedCacheEntry, BSONObjectID](collectionName, component.mongoConnector.db, EncryptedCacheEntry.mongoCacheFormat) {
-
-  def expiryDays: Int
-
-  val expireAfterSeconds: Long = 0
-
-  private lazy val ExpiryDateIndex = "expiryDateIndex"
-  private lazy val UniqueKeyIndex = "uniqueKeyIndex"
-  private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
+abstract class CacheRepository @Inject()(component: MongoComponent, collectionName: String, val expiryDays: Long = 0)(implicit ec: ExecutionContext)
+  extends PlayMongoRepository[EncryptedCacheEntry](component, collectionName, EncryptedCacheEntry.mongoCacheFormat, Seq(
+    IndexModel(ascending("key"), IndexOptions().name("uniqueKeyIndex").unique(true)),
+    IndexModel(ascending("expiryDate"), IndexOptions().name("expiryDateIndex").expireAfter(expiryDays, TimeUnit.DAYS))
+  ), replaceIndexes = true) {
 
   def findByRequest(encryptedKey: String)(implicit ec: ExecutionContext): Future[Option[String]] = {
-    find("key" → encryptedKey)
+    collection.find(equal("key", encryptedKey)).toFuture()
       .map(_.headOption)
       .map {
-        case Some(ece) ⇒ Some(ece.data)
+        case Some(ece) ⇒
+          Some(ece.data)
         case None ⇒ None
       }
   }
 
-  def insert(encryptedKey: String, encryptedData: String)(implicit ec: ExecutionContext): Future[WriteResult] =
-    collection.insert(
-      EncryptedCacheEntry(BSONObjectID.generate(),
+  def insert(encryptedKey: String, encryptedData: String)(implicit ec: ExecutionContext): Future[InsertOneResult] =
+    collection.insertOne(
+      EncryptedCacheEntry(ObjectId.get(),
         encryptedKey,
         encryptedData,
-        ZonedDateTime.now(ZoneOffset.UTC).plusDays(expiryDays))
-    )
-
-  override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
-    import reactivemongo.bson.DefaultBSONHandlers._
-
-    val indexes = collection.indexesManager.list()
-    indexes.flatMap { idxs =>
-      val unique = idxs.find(index => index.eventualName == UniqueKeyIndex)
-      val expiry = idxs.find(index =>
-        index.eventualName == ExpiryDateIndex
-          && index.options.getAs[BSONLong](OptExpireAfterSeconds).fold(false)(_.as[Long] != expireAfterSeconds))
-
-      Future.sequence(Seq(ensureExpiryDateIndex(expiry), ensureUniqueKeyIndex(unique)))
-    }
-  }
-
-  private def ensureExpiryDateIndex(existingIndex: Option[Index])(implicit ec: ExecutionContext) = {
-    Logger.info(s"Creating time to live for entries in ${collection.name} to $expireAfterSeconds seconds")
-
-    existingIndex.fold(Future.successful(0)) { idx => collection.indexesManager.drop(idx.eventualName) }
-      .flatMap { _ =>
-        collection.indexesManager.ensure(
-          Index(
-            key = Seq("expiryDate" -> IndexType.Ascending),
-            name = Some(ExpiryDateIndex),
-            options = BSONDocument(OptExpireAfterSeconds -> expireAfterSeconds)))
-      }
-  }
-
-  private def ensureUniqueKeyIndex(existingIndex: Option[Index])(implicit ec: ExecutionContext) = {
-    collection.indexesManager.ensure(
-      Index(
-        key = Seq("key" -> IndexType.Ascending),
-        name = Some(UniqueKeyIndex),
-        options = BSONDocument("unique" -> true)
-      )
-    )
-  }
+        LocalDateTime.now(ZoneOffset.UTC).plusDays(expiryDays))
+    ).toFuture()
 }
