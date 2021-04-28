@@ -41,7 +41,8 @@ abstract class CacheRepository @Inject()(component: MongoComponent, collectionNa
     collection.find(equal("key", encryptedKey)).toFuture()
       .map(_.headOption)
       .map {
-        case Some(ece) ⇒ Some(ece.data)
+        case Some(ece) ⇒
+          Some(ece.data)
         case None ⇒ None
       }
   }
