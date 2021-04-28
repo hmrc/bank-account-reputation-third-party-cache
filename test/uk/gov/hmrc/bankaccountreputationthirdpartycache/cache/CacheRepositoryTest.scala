@@ -49,11 +49,11 @@ class CacheRepositoryTest extends AnyWordSpec
       .build()
 
   val mongoComponent: MongoComponent = app.injector.instanceOf[MongoComponent]
-  val mongoRepo: CacheRepository = new CacheRepository(mongoComponent, "test-cache", expiryDays = 1) {}
+  val mongoRepo: CacheRepository = new CacheRepository(mongoComponent, "test-cache", expiryDays = 0) {}
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    //mongoRepo.collection.deleteMany(Document()).toFuture().futureValue
+    mongoRepo.collection.deleteMany(Document()).toFuture().futureValue
   }
 
   "Caching Repository" should {

@@ -15,6 +15,6 @@ object AppDependencies {
     "org.pegdown"             %  "pegdown"                   % "1.6.0"                 % "test, it",
     "org.scalatestplus.play"  %% "scalatestplus-play"        % "5.1.0"                 % "test, it",
     "org.scalatestplus"       %% "mockito-3-4"               % "3.1.4.0"               % "test, it",
-    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"   % "0.49.0"                % "test, it"
+    "com.vladsch.flexmark"    %  "flexmark-all"              % "0.35.10"               % "test, it"
   )
 }
