@@ -23,6 +23,5 @@ import uk.gov.hmrc.mongo.MongoComponent
 import scala.concurrent.ExecutionContext
 
 class CallValidateCacheRepository @Inject()(appConfig: AppConfig, component: MongoComponent)(implicit ec: ExecutionContext)
-  extends CacheRepository(component, "call-validate-cache") {
-  val expiryDays: Int = appConfig.transunionCacheItemExpiryDays
+  extends CacheRepository(component, "call-validate-cache", appConfig.transunionCacheItemExpiryDays) {
 }

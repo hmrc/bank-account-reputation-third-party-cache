@@ -31,13 +31,11 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class CacheRepository @Inject()(component: MongoComponent, collectionName: String)(implicit ec: ExecutionContext)
+abstract class CacheRepository @Inject()(component: MongoComponent, collectionName: String, val expiryDays: Long = 0)(implicit ec: ExecutionContext)
   extends PlayMongoRepository[EncryptedCacheEntry](component, collectionName, EncryptedCacheEntry.mongoCacheFormat, Seq(
     IndexModel(ascending("key"), IndexOptions().name("uniqueKeyIndex").unique(true)),
-    IndexModel(ascending("expiryDate"), IndexOptions().name("expiryDateIndex").expireAfter(1L, TimeUnit.DAYS))
-  ), replaceIndexes = false) {
-
-  def expiryDays: Int
+    IndexModel(ascending("expiryDate"), IndexOptions().name("expiryDateIndex").expireAfter(expiryDays, TimeUnit.DAYS))
+  ), replaceIndexes = true) {
 
   def findByRequest(encryptedKey: String)(implicit ec: ExecutionContext): Future[Option[String]] = {
     collection.find(equal("key", encryptedKey)).toFuture()

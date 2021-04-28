@@ -24,7 +24,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.MongoComponent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -32,7 +32,6 @@ import scala.util.Random
 
 class CacheRepositoryTest extends AnyWordSpec
   with Matchers
-  with uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport[EncryptedCacheEntry]
   with ScalaFutures
   with BeforeAndAfterEach
   with GuiceOneAppPerSuite
@@ -49,15 +48,12 @@ class CacheRepositoryTest extends AnyWordSpec
       )
       .build()
 
-  val mongoRepo: CacheRepository = new CacheRepository(mongoComponent, "test-cache") {
-    override def expiryDays: Int = 1
-  }
-
-  override lazy val repository: PlayMongoRepository[EncryptedCacheEntry] = mongoRepo
+  val mongoComponent: MongoComponent = app.injector.instanceOf[MongoComponent]
+  val mongoRepo: CacheRepository = new CacheRepository(mongoComponent, "test-cache", expiryDays = 1) {}
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    mongoRepo.collection.deleteMany(Document()).toFuture().futureValue
+    //mongoRepo.collection.deleteMany(Document()).toFuture().futureValue
   }
 
   "Caching Repository" should {

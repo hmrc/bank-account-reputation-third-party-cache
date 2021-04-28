@@ -23,6 +23,5 @@ import uk.gov.hmrc.mongo.MongoComponent
 import scala.concurrent.ExecutionContext
 
 class CreditSafeCacheRepository @Inject()(appConfig: AppConfig, component: MongoComponent)(implicit ec: ExecutionContext)
-  extends CacheRepository(component, "credit-safe-cache") {
-  val expiryDays: Int = appConfig.creditSafeCacheItemExpiryDays
+  extends CacheRepository(component, "credit-safe-cache", appConfig.creditSafeCacheItemExpiryDays) {
 }
