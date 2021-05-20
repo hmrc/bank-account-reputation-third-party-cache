@@ -16,23 +16,22 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
-import java.time.{LocalDateTime, ZoneOffset, ZonedDateTime}
+import java.time.{LocalDateTime, ZoneOffset}
 import java.util.concurrent.TimeUnit
-
 import javax.inject.Inject
 import org.bson.types.ObjectId
 import org.mongodb.scala._
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.model.{IndexModel, IndexOptions}
-import org.mongodb.scala.result.InsertOneResult
+import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, ReplaceOptions}
+import org.mongodb.scala.result.UpdateResult
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class CacheRepository @Inject()(component: MongoComponent, collectionName: String, val expiryDays: Long = 0)(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[EncryptedCacheEntry](component, collectionName, EncryptedCacheEntry.mongoCacheFormat, Seq(
+  extends PlayMongoRepository[EncryptedCacheEntry](component, collectionName, EncryptedCacheEntry.cacheFormat, Seq(
     IndexModel(ascending("key"), IndexOptions().name("uniqueKeyIndex").unique(true)),
     IndexModel(ascending("expiryDate"), IndexOptions().name("expiryDateIndex").expireAfter(expiryDays, TimeUnit.DAYS))
   ), replaceIndexes = true) {
@@ -47,11 +46,13 @@ abstract class CacheRepository @Inject()(component: MongoComponent, collectionNa
       }
   }
 
-  def insert(encryptedKey: String, encryptedData: String)(implicit ec: ExecutionContext): Future[InsertOneResult] =
-    collection.insertOne(
-      EncryptedCacheEntry(ObjectId.get(),
+  def store(encryptedKey: String, encryptedData: String)(implicit ec: ExecutionContext): Future[UpdateResult] =
+    collection.replaceOne(
+      Filters.eq("key", encryptedKey),
+      EncryptedCacheEntry(
         encryptedKey,
         encryptedData,
-        LocalDateTime.now(ZoneOffset.UTC).plusDays(expiryDays))
+        LocalDateTime.now(ZoneOffset.UTC).plusDays(expiryDays)),
+      ReplaceOptions().upsert(true)
     ).toFuture()
 }

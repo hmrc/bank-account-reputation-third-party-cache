@@ -62,17 +62,33 @@ class CacheRepositoryTest extends AnyWordSpec
       val request = Random.nextString(10)
       val response = "true, None, None"
 
-      mongoRepo.insert(request, response).futureValue
+      mongoRepo.store(request, response).futureValue
 
       val cachedValue = mongoRepo.findByRequest(request).futureValue
       cachedValue shouldBe Some(response)
+    }
+
+    "update a cache entry if it already exists" in {
+      val request = Random.nextString(10)
+      val response = "true, None, None"
+      val anotherResponse = "false, None, None"
+
+      mongoRepo.store(request, response).futureValue
+
+      val cachedValue = mongoRepo.findByRequest(request).futureValue
+      cachedValue shouldBe Some(response)
+
+      mongoRepo.store(request, anotherResponse).futureValue
+
+      val updatedValue = mongoRepo.findByRequest(request).futureValue
+      updatedValue shouldBe Some(anotherResponse)
     }
 
     "create cache entry when asked and expire after TTL" in {
       val request = Random.nextString(10)
       val response = "true, None, None"
 
-      mongoRepo.insert(request, response).futureValue
+      mongoRepo.store(request, response).futureValue
 
       val cachedValue = mongoRepo.findByRequest(request).futureValue
       cachedValue shouldBe Some(response)

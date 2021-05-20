@@ -21,8 +21,7 @@ import java.time.LocalDateTime
 import org.bson.types.ObjectId
 import play.api.libs.json._
 
-case class EncryptedCacheEntry(id: ObjectId,
-                               key: String,
+case class EncryptedCacheEntry(key: String,
                                data: String,
                                expiryDate: LocalDateTime)
 
@@ -36,5 +35,4 @@ object EncryptedCacheEntry {
   implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
 
   implicit val cacheFormat: OFormat[EncryptedCacheEntry] = Json.format[EncryptedCacheEntry]
-  implicit val mongoCacheFormat: Format[EncryptedCacheEntry] = MongoFormats.mongoEntity(cacheFormat)
 }

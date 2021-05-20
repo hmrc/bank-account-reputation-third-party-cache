@@ -17,6 +17,8 @@
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
 import akka.http.scaladsl.model.MediaTypes
+import play.api.Logger
+
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -36,6 +38,8 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
   extends BackendController(cc) {
 
   private def WithBasicAuth = new BasicAuthAction[JsValue]("bars", appConfig.basicAuthToken)(parse.json)
+
+  val logger = Logger("CacheController")
 
   def storeConfirmationOfPayeeBusiness(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
     store(request, confirmationOfPayeeBusinessCacheRepository)
@@ -75,15 +79,18 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
 
     Json.fromJson[StoreRequest](request.body).asOpt match {
       case Some(request) =>
-        repository.insert(request.encryptedKey, request.encryptedData).map {
+        repository.store(request.encryptedKey, request.encryptedData).map {
           case result if result.wasAcknowledged() ⇒ Ok(Json.toJson(
             StoreResponse(stored = true, description = None))
           ).as(MediaTypes.`application/json`.value)
-          case _ ⇒ InternalServerError(Json.toJson(
+          case _ ⇒
+            logger.error(s"Could not cache the data")
+            InternalServerError(Json.toJson(
             StoreResponse(stored = false, description = Some("Could not cache the data")))
           ).as(MediaTypes.`application/json`.value)
         }.recoverWith {
-          case _ ⇒
+          case t ⇒
+            logger.error(s"Error inserting cache data: ${t.getMessage()}")
             Future.successful(InternalServerError(Json.toJson(
               StoreResponse(stored = false, description = Some("Error inserting cache data.")))
             ).as(MediaTypes.`application/json`.value))

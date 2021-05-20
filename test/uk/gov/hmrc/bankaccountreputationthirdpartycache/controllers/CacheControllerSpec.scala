@@ -25,7 +25,7 @@ import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.Timeout
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers._
-import org.mongodb.scala.result.InsertOneResult
+import org.mongodb.scala.result.UpdateResult
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -89,9 +89,9 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
     "return Ok(200) and cache the key and data" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv, cs)
 
-      val mockWriteResult: InsertOneResult = mock[InsertOneResult]
+      val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(true)
-      when(cpp.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+      when(cpp.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeConfirmationOfPayeePersonal()(fakeStoreRequest))
     }
@@ -119,9 +119,9 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
     "return Ok(200) and cache the key and data" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv, cs)
 
-      val mockWriteResult: InsertOneResult = mock[InsertOneResult]
+      val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(true)
-      when(cpb.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+      when(cpb.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeConfirmationOfPayeeBusiness()(fakeStoreRequest))
     }
@@ -149,9 +149,9 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
     "return Ok(200) and cache the key and data" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv, cs)
 
-      val mockWriteResult: InsertOneResult = mock[InsertOneResult]
+      val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(true)
-      when(cv.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+      when(cv.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeCallValidate()(fakeStoreRequest))
     }
@@ -179,9 +179,9 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
     "return Ok(200) and cache the key and data" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv, cs)
 
-      val mockWriteResult: InsertOneResult = mock[InsertOneResult]
+      val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(true)
-      when(cs.insert(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+      when(cs.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeCreditSafe()(fakeStoreRequest))
     }
