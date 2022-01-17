@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import play.api.Logger
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
-import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository, CreditSafeCacheRepository}
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
@@ -33,8 +33,7 @@ import scala.concurrent.Future
 class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
                                 confirmationOfPayeeBusinessCacheRepository: ConfirmationOfPayeeBusinessCacheRepository,
                                 confirmationOfPayeePersonalCacheRepository: ConfirmationOfPayeePersonalCacheRepository,
-                                callValidateCacheRepository: CallValidateCacheRepository,
-                                creditSafeCacheRepository: CreditSafeCacheRepository)
+                                callValidateCacheRepository: CallValidateCacheRepository)
   extends BackendController(cc) {
 
   private def WithBasicAuth = new BasicAuthAction[JsValue]("bars", appConfig.basicAuthToken)(parse.json)
@@ -63,14 +62,6 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
 
   def retrieveCallValidate(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
     retrieve(request, callValidateCacheRepository)
-  }
-
-  def storeCreditSafe(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
-    store(request, creditSafeCacheRepository)
-  }
-
-  def retrieveCreditSafe(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
-    retrieve(request, creditSafeCacheRepository)
   }
 
   private def store(request: Request[JsValue], repository: CacheRepository) = {
