@@ -24,16 +24,15 @@ import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
                                 confirmationOfPayeeBusinessCacheRepository: ConfirmationOfPayeeBusinessCacheRepository,
                                 confirmationOfPayeePersonalCacheRepository: ConfirmationOfPayeePersonalCacheRepository,
-                                callValidateCacheRepository: CallValidateCacheRepository)
+                                callValidateCacheRepository: CallValidateCacheRepository)(implicit ec: ExecutionContext)
   extends BackendController(cc) {
 
   private def WithBasicAuth = new BasicAuthAction[JsValue]("bars", appConfig.basicAuthToken)(parse.json)

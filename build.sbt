@@ -6,7 +6,7 @@ val appName = "bank-account-reputation-third-party-cache"
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
   .settings(
-    scalaVersion := "2.12.14",
+    scalaVersion := "2.13.10",
     majorVersion := 0,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )

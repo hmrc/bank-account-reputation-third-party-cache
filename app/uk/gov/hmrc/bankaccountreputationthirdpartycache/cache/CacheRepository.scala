@@ -16,10 +16,6 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
-import java.time.{LocalDateTime, ZoneOffset}
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import org.bson.types.ObjectId
 import org.mongodb.scala._
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Indexes.ascending
@@ -28,8 +24,12 @@ import org.mongodb.scala.result.UpdateResult
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
+import java.time.{LocalDateTime, ZoneOffset}
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 abstract class CacheRepository @Inject()(component: MongoComponent, collectionName: String, val expiryDays: Long = 0)(implicit ec: ExecutionContext)
   extends PlayMongoRepository[EncryptedCacheEntry](component, collectionName, EncryptedCacheEntry.cacheFormat, Seq(
     IndexModel(ascending("key"), IndexOptions().name("uniqueKeyIndex").unique(true)),
