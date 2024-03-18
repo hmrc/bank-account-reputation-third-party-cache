@@ -19,10 +19,10 @@ package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.MediaTypes
-import akka.stream.{ActorMaterializer, Materializer}
-import akka.util.Timeout
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model.MediaTypes
+import org.apache.pekko.stream.{ActorMaterializer, Materializer}
+import org.apache.pekko.util.Timeout
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers._
 import org.mongodb.scala.result.UpdateResult

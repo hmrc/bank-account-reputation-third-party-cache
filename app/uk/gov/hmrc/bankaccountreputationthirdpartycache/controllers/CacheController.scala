@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
-import akka.http.scaladsl.model.MediaTypes
+import org.apache.pekko.http.scaladsl.model.MediaTypes
 import play.api.Logger
 
 import javax.inject.{Inject, Singleton}

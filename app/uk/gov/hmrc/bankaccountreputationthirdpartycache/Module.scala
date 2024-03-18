@@ -27,7 +27,7 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 
-class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
+class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with PekkoGuiceSupport {
   override def configure(): Unit = {
     bind(classOf[AppConfig])
     bind(classOf[ConfirmationOfPayeeBusinessCacheRepository])
