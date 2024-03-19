@@ -24,7 +24,8 @@ import org.mongodb.scala.result.UpdateResult
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.temporal.ChronoUnit
+import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +53,7 @@ abstract class CacheRepository @Inject()(component: MongoComponent, collectionNa
       EncryptedCacheEntry(
         encryptedKey,
         encryptedData,
-        LocalDateTime.now(ZoneOffset.UTC).plusDays(expiryDays)),
+        Instant.now(Clock.systemUTC()).plus(expiryDays, ChronoUnit.DAYS)),
       ReplaceOptions().upsert(true)
     ).toFuture()
 }

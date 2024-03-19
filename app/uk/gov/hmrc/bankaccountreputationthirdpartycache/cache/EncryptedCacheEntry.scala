@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
-import java.time.LocalDateTime
-
 import org.bson.types.ObjectId
 import play.api.libs.json._
 
+import java.time.Instant
+
 case class EncryptedCacheEntry(key: String,
                                data: String,
-                               expiryDate: LocalDateTime)
+                               expiryDate: Instant)
 
 object EncryptedCacheEntry {
 
@@ -32,7 +32,8 @@ object EncryptedCacheEntry {
   final val DATA_ATTRIBUTE_NAME = "data"
 
   implicit val format: Format[ObjectId] = MongoFormats.objectIdFormat
-  implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
+  implicit val datetimeFormat: Format[Instant] =
+    uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 
   implicit val cacheFormat: OFormat[EncryptedCacheEntry] = Json.format[EncryptedCacheEntry]
 }
