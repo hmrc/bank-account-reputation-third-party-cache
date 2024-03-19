@@ -1,3 +1,5 @@
+import uk.gov.hmrc.DefaultBuildSettings
+
 val appName = "bank-account-reputation-third-party-cache"
 
 ThisBuild / scalaVersion        := "2.13.13"
@@ -18,3 +20,9 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(PlayKeys.playDefaultPort := 9899)
   .settings(resolvers += Resolver.jcenterRepo)
+
+lazy val it = project.in(file("it"))
+  .enablePlugins(play.sbt.PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(Test / fork := true)
