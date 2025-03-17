@@ -4,5 +4,3 @@ POST        /confirmation-of-payee/business/store           uk.gov.hmrc.bankacco
 POST        /confirmation-of-payee/business/retrieve        uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveConfirmationOfPayeeBusiness
 POST        /confirmation-of-payee/personal/store           uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeConfirmationOfPayeePersonal
 POST        /confirmation-of-payee/personal/retrieve        uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveConfirmationOfPayeePersonal
-POST        /call-validate/store                            uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.storeCallValidate
-POST        /call-validate/retrieve                         uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers.CacheController.retrieveCallValidate
