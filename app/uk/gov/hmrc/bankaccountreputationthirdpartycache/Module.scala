@@ -24,7 +24,7 @@ package uk.gov.hmrc.bankaccountreputationthirdpartycache
 import com.google.inject.AbstractModule
 import play.api.libs.concurrent._
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 
 class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with PekkoGuiceSupport {
@@ -32,6 +32,5 @@ class Module(environment: Environment, playConfig: Configuration) extends Abstra
     bind(classOf[AppConfig])
     bind(classOf[ConfirmationOfPayeeBusinessCacheRepository])
     bind(classOf[ConfirmationOfPayeePersonalCacheRepository])
-    bind(classOf[CallValidateCacheRepository])
   }
 }

@@ -23,5 +23,5 @@ import uk.gov.hmrc.mongo.MongoComponent
 import scala.concurrent.ExecutionContext
 
 class ConfirmationOfPayeeBusinessCacheRepository @Inject()(appConfig: AppConfig, component: MongoComponent)(implicit ec: ExecutionContext)
-  extends CacheRepository(component, "confirmation-of-payee-business-cache", appConfig.surepayBusinessCacheItemExpiryDays) {
+  extends CacheRepository(component, "confirmation-of-payee-business-cache", appConfig.payeeBusinessCacheItemExpiryDays) {
 }

@@ -22,7 +22,7 @@ import play.api.Logger
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
-import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -30,9 +30,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
-                                confirmationOfPayeeBusinessCacheRepository: ConfirmationOfPayeeBusinessCacheRepository,
-                                confirmationOfPayeePersonalCacheRepository: ConfirmationOfPayeePersonalCacheRepository,
-                                callValidateCacheRepository: CallValidateCacheRepository)(implicit ec: ExecutionContext)
+                                confirmationOfPayeeBusinessCacheRepository:  ConfirmationOfPayeeBusinessCacheRepository,
+                                confirmationOfPayeePersonalCacheRepository: ConfirmationOfPayeePersonalCacheRepository)(implicit ec: ExecutionContext)
   extends BackendController(cc) {
 
   private def WithBasicAuth = new BasicAuthAction[JsValue]("bars", appConfig.basicAuthToken)(parse.json)
@@ -53,14 +52,6 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
 
   def retrieveConfirmationOfPayeePersonal(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
     retrieve(request, confirmationOfPayeePersonalCacheRepository)
-  }
-
-  def storeCallValidate(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
-    store(request, callValidateCacheRepository)
-  }
-
-  def retrieveCallValidate(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
-    retrieve(request, callValidateCacheRepository)
   }
 
   private def store(request: Request[JsValue], repository: CacheRepository) = {

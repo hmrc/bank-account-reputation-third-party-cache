@@ -6,5 +6,5 @@ resolvers += Resolver.url(
 )(Resolver.ivyStylePatterns)
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "3.24.0")
-addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "2.5.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "2.6.0")
 addSbtPlugin("org.playframework" % "sbt-plugin" % "3.0.6")

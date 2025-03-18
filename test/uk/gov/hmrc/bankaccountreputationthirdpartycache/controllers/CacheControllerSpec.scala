@@ -34,7 +34,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Headers, Result}
 import play.api.test.{FakeRequest, Helpers}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CallValidateCacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.http.HeaderNames
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -70,7 +70,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
   "POST /confirmation-of-payee/personal/retrieve" should {
     "return Ok(200) and the value" in new Setup() {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp)
 
       when(cpp.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
 
@@ -78,7 +78,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
     }
 
     "return NotFound(404) when key not found in cache" in new Setup {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp)
 
       when(cpp.findByRequest(any())(any())).thenReturn(Future.successful(None))
 
@@ -88,7 +88,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
   "POST /confirmation-of-payee/personal/store" should {
     "return Ok(200) and cache the key and data" in new Setup {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp)
 
       val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(true)
@@ -100,7 +100,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
   "POST /confirmation-of-payee/business/retrieve" should {
     "return Ok(200) and the value" in new Setup() {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp)
 
       when(cpb.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
 
@@ -108,7 +108,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
     }
 
     "return NotFound(404) when key not found in cache" in new Setup {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp)
 
       when(cpb.findByRequest(any())(any())).thenReturn(Future.successful(None))
 
@@ -118,7 +118,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
   "POST /confirmation-of-payee/business/store" should {
     "return Ok(200) and cache the key and data" in new Setup {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
+      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp)
 
       val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(true)
@@ -127,41 +127,10 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
       assertStoreResult(controller.storeConfirmationOfPayeeBusiness()(fakeStoreRequest))
     }
   }
-
-  "POST /call-validate/retrieve" should {
-    "return Ok(200) and the value" in new Setup() {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
-
-      when(cv.findByRequest(any())(any())).thenReturn(Future.successful(Some("some_data")))
-
-      assertRetrieveResult(controller.retrieveCallValidate()(fakeRetrieveRequest))
-    }
-
-    "return NotFound(404) when key not found in cache" in new Setup {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
-
-      when(cv.findByRequest(any())(any())).thenReturn(Future.successful(None))
-
-      assertRetrieve404(controller.retrieveCallValidate()(fakeRetrieveRequest))
-    }
-  }
-
-  "POST /call-validate/store" should {
-    "return Ok(200) and cache the key and data" in new Setup {
-      val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp, cv)
-
-      val mockWriteResult: UpdateResult = mock[UpdateResult]
-      when(mockWriteResult.wasAcknowledged()).thenReturn(true)
-      when(cv.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
-
-      assertStoreResult(controller.storeCallValidate()(fakeStoreRequest))
-    }
-  }
-
+  
   trait Setup {
     val cpb: ConfirmationOfPayeeBusinessCacheRepository = mock[ConfirmationOfPayeeBusinessCacheRepository]
     val cpp: ConfirmationOfPayeePersonalCacheRepository = mock[ConfirmationOfPayeePersonalCacheRepository]
-    val cv: CallValidateCacheRepository = mock[CallValidateCacheRepository]
 
     def assertRetrieveResult(result: Future[Result]): Unit = {
       Helpers.status(result) shouldBe Status.OK
