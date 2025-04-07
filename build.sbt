@@ -18,6 +18,7 @@ lazy val microservice = Project(appName, file("."))
     buildInfoKeys := Seq[BuildInfoKey](version),
     buildInfoPackage := "buildinfo"
   )
+  .settings(CodeCoverageSettings.settings: _*)
   .settings(PlayKeys.playDefaultPort := 9899)
   .settings(resolvers += Resolver.jcenterRepo)
 

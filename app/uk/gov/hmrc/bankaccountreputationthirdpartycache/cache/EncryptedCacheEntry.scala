@@ -29,8 +29,6 @@ object EncryptedCacheEntry {
 
   import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 
-  final val DATA_ATTRIBUTE_NAME = "data"
-
   implicit val format: Format[ObjectId] = MongoFormats.objectIdFormat
   implicit val datetimeFormat: Format[Instant] =
     uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat

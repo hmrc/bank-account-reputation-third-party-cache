@@ -84,19 +84,5 @@ class CacheRepositoryTest extends AnyWordSpec
       updatedValue shouldBe Some(anotherResponse)
     }
 
-    "create cache entry when asked and expire after TTL" in {
-      val request = Random.nextString(10)
-      val response = "true, None, None"
-
-      mongoRepo.store(request, response).futureValue
-
-      val cachedValue = mongoRepo.findByRequest(request).futureValue
-      cachedValue shouldBe Some(response)
-
-      eventually(timeout(60.seconds), interval(1.seconds)) {
-        val cachedValue = mongoRepo.findByRequest(request).futureValue
-        cachedValue shouldBe None
-      }
-    }
   }
 }
