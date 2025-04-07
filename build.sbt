@@ -2,7 +2,7 @@ import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "bank-account-reputation-third-party-cache"
 
-ThisBuild / scalaVersion        := "2.13.13"
+ThisBuild / scalaVersion        := "2.13.16"
 ThisBuild / majorVersion        := 0
 
 lazy val microservice = Project(appName, file("."))
