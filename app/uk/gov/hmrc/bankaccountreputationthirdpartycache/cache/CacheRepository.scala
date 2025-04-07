@@ -45,9 +45,9 @@ abstract class CacheRepository @Inject()(
     collection.find(equal("key", encryptedKey)).toFuture()
       .map(_.headOption)
       .map {
-        case Some(ece) ⇒
+        case Some(ece) =>
           Some(ece.data)
-        case None ⇒ None
+        case None => None
       }
   }
 
