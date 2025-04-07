@@ -18,14 +18,13 @@ package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
 import org.apache.pekko.http.scaladsl.model.MediaTypes
 import play.api.Logger
-
-import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
@@ -36,7 +35,7 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
 
   private def WithBasicAuth = new BasicAuthAction[JsValue]("bars", appConfig.basicAuthToken)(parse.json)
 
-  val logger = Logger("CacheController")
+  val logger: Logger = Logger("CacheController")
 
   def storeConfirmationOfPayeeBusiness(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
     store(request, confirmationOfPayeeBusinessCacheRepository)
@@ -61,22 +60,22 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
     Json.fromJson[StoreRequest](request.body).asOpt match {
       case Some(request) =>
         repository.store(request.encryptedKey, request.encryptedData).map {
-          case result if result.wasAcknowledged() ⇒ Ok(Json.toJson(
+          case result if result.wasAcknowledged() => Ok(Json.toJson(
             StoreResponse(stored = true, description = None))
           ).as(MediaTypes.`application/json`.value)
-          case _ ⇒
+          case _ =>
             logger.error(s"Could not cache the data")
             InternalServerError(Json.toJson(
             StoreResponse(stored = false, description = Some("Could not cache the data")))
           ).as(MediaTypes.`application/json`.value)
         }.recoverWith {
-          case t ⇒
-            logger.error(s"Error inserting cache data: ${t.getMessage()}")
+          case t =>
+            logger.error(s"Error inserting cache data: ${t.getMessage}")
             Future.successful(InternalServerError(Json.toJson(
               StoreResponse(stored = false, description = Some("Error inserting cache data.")))
             ).as(MediaTypes.`application/json`.value))
         }
-      case None ⇒
+      case None =>
         Future.successful(BadRequest(Json.toJson(
           StoreResponse(stored = false, description = Some("Cache request was not valid")))
         ).as(MediaTypes.`application/json`.value)
@@ -91,21 +90,21 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
     Json.fromJson[RetrieveRequest](request.body).asOpt match {
       case Some(request) =>
         repository.findByRequest(request.encryptedKey).map {
-          case Some(encryptedData) ⇒
+          case Some(encryptedData) =>
             Ok(Json.toJson(
               RetrieveResponse(encryptedData = Some(encryptedData), description = None))
             ).as(MediaTypes.`application/json`.value)
-          case _ ⇒
+          case _ =>
             NotFound(Json.toJson(
               RetrieveResponse(encryptedData = None, description = Some("Could not find data for given key")))
             ).as(MediaTypes.`application/json`.value)
         }.recoverWith {
-          case _ ⇒
+          case _ =>
             Future.successful(InternalServerError(Json.toJson(
               StoreResponse(stored = false, description = Some("Error retrieving cache data.")))
             ).as(MediaTypes.`application/json`.value))
         }
-      case _ ⇒
+      case _ =>
         Future.successful(
           BadRequest(Json.toJson(
             RetrieveResponse(encryptedData = None, description = Some("Retrieve request was not valid")))
