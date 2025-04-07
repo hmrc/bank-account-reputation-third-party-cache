@@ -18,14 +18,13 @@ package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
 import org.apache.pekko.http.scaladsl.model.MediaTypes
 import play.api.Logger
-
-import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.cache.{CacheRepository, ConfirmationOfPayeeBusinessCacheRepository, ConfirmationOfPayeePersonalCacheRepository}
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
@@ -36,7 +35,7 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
 
   private def WithBasicAuth = new BasicAuthAction[JsValue]("bars", appConfig.basicAuthToken)(parse.json)
 
-  val logger = Logger("CacheController")
+  val logger: Logger = Logger("CacheController")
 
   def storeConfirmationOfPayeeBusiness(): Action[JsValue] = WithBasicAuth.async { implicit request: Request[JsValue] =>
     store(request, confirmationOfPayeeBusinessCacheRepository)
@@ -71,7 +70,7 @@ class CacheController @Inject()(appConfig: AppConfig, cc: ControllerComponents,
           ).as(MediaTypes.`application/json`.value)
         }.recoverWith {
           case t =>
-            logger.error(s"Error inserting cache data: ${t.getMessage()}")
+            logger.error(s"Error inserting cache data: ${t.getMessage}")
             Future.successful(InternalServerError(Json.toJson(
               StoreResponse(stored = false, description = Some("Error inserting cache data.")))
             ).as(MediaTypes.`application/json`.value))

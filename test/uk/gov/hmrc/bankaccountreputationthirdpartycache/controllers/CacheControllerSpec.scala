@@ -16,14 +16,11 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.controllers
 
-import java.nio.charset.StandardCharsets
-import java.util.Base64
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.MediaTypes
-import org.apache.pekko.stream.{ActorMaterializer, Materializer}
 import org.apache.pekko.util.Timeout
-import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito.when
 import org.mongodb.scala.result.UpdateResult
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -38,6 +35,8 @@ import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.http.HeaderNames
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.nio.charset.StandardCharsets
+import java.util.Base64
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -46,8 +45,6 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
   import scala.concurrent.duration._
 
   implicit val system: ActorSystem = ActorSystem("CacheControllerSpec")
-
-  implicit def mat: Materializer = ActorMaterializer()
 
   implicit val timeout: Timeout = Timeout(5.seconds)
 
@@ -109,7 +106,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
       val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(true)
-      when(cpp.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+      when(cpp.store(any(), any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeConfirmationOfPayeePersonal()(fakeStoreRequest))
     }
@@ -119,7 +116,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
       val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(false)
-      when(cpp.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+      when(cpp.store(any(), any())).thenReturn(Future.successful(mockWriteResult))
 
       val result: Future[Result] = controller.storeConfirmationOfPayeePersonal()(fakeStoreRequest)
       Helpers.status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -128,7 +125,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
     "return InternalServerError(500) when an error occurs" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp)
 
-      when(cpp.store(any(), any())(any())).thenReturn(Future.failed(new Exception("error")))
+      when(cpp.store(any(), any())).thenReturn(Future.failed(new Exception("error")))
 
       val result: Future[Result] = controller.storeConfirmationOfPayeePersonal()(fakeStoreRequest)
       Helpers.status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -186,7 +183,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
       val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(true)
-      when(cpb.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+      when(cpb.store(any(), any())).thenReturn(Future.successful(mockWriteResult))
 
       assertStoreResult(controller.storeConfirmationOfPayeeBusiness()(fakeStoreRequest))
     }
@@ -196,7 +193,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
 
       val mockWriteResult: UpdateResult = mock[UpdateResult]
       when(mockWriteResult.wasAcknowledged()).thenReturn(false)
-      when(cpb.store(any(), any())(any())).thenReturn(Future.successful(mockWriteResult))
+      when(cpb.store(any(), any())).thenReturn(Future.successful(mockWriteResult))
 
       val result: Future[Result] = controller.storeConfirmationOfPayeeBusiness()(fakeStoreRequest)
       Helpers.status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -205,7 +202,7 @@ class CacheControllerSpec extends AnyWordSpec with MockitoSugar with Matchers {
     "return InternalServerError(500) when an error occurs" in new Setup {
       val controller = new CacheController(appConfig, Helpers.stubControllerComponents(), cpb, cpp)
 
-      when(cpb.store(any(), any())(any())).thenReturn(Future.failed(new Exception("error")))
+      when(cpb.store(any(), any())).thenReturn(Future.failed(new Exception("error")))
 
       val result: Future[Result] = controller.storeConfirmationOfPayeeBusiness()(fakeStoreRequest)
       Helpers.status(result) shouldBe Status.INTERNAL_SERVER_ERROR

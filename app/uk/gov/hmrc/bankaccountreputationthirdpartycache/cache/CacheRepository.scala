@@ -51,7 +51,7 @@ abstract class CacheRepository @Inject()(
       }
   }
 
-  def store(encryptedKey: String, encryptedData: String)(implicit ec: ExecutionContext): Future[UpdateResult] =
+  def store(encryptedKey: String, encryptedData: String): Future[UpdateResult] =
     collection.replaceOne(
       Filters.eq("key", encryptedKey),
       EncryptedCacheEntry(
