@@ -21,6 +21,7 @@ import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, ReplaceOptions}
 import org.mongodb.scala.result.UpdateResult
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
@@ -30,11 +31,15 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-abstract class CacheRepository @Inject()(component: MongoComponent, collectionName: String, val expiryDays: Long = 0)(implicit ec: ExecutionContext)
+abstract class CacheRepository @Inject()(
+                                          component: MongoComponent,
+                                          collectionName: String,
+                                          val expiryDays: Long = 0
+                                        )(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends PlayMongoRepository[EncryptedCacheEntry](component, collectionName, EncryptedCacheEntry.cacheFormat, Seq(
     IndexModel(ascending("key"), IndexOptions().name("uniqueKeyIndex").unique(true)),
     IndexModel(ascending("expiryDate"), IndexOptions().name("expiryDateIndex").expireAfter(expiryDays, TimeUnit.DAYS))
-  ), replaceIndexes = true) {
+  ), replaceIndexes = appConfig.cacheReplaceIndexes()) {
 
   def findByRequest(encryptedKey: String)(implicit ec: ExecutionContext): Future[Option[String]] = {
     collection.find(equal("key", encryptedKey)).toFuture()

@@ -17,13 +17,14 @@
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
 import org.mongodb.scala.bson.collection.immutable.Document
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.mongo.MongoComponent
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,6 +48,8 @@ class CacheRepositoryTest extends AnyWordSpec
         "metrics.jvm" -> false)
       )
       .build()
+
+  implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
   val mongoComponent: MongoComponent = app.injector.instanceOf[MongoComponent]
   val mongoRepo: CacheRepository = new CacheRepository(mongoComponent, "test-cache", expiryDays = 0) {}

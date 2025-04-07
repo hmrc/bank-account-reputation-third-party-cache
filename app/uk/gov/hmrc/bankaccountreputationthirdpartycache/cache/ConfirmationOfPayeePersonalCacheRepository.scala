@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
-import javax.inject.Inject
 import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.mongo.MongoComponent
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class ConfirmationOfPayeePersonalCacheRepository @Inject()(appConfig: AppConfig, component: MongoComponent)(implicit ec: ExecutionContext)
+class ConfirmationOfPayeePersonalCacheRepository @Inject()(component: MongoComponent)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends CacheRepository(component, "confirmation-of-payee-personal-cache", appConfig.payeePersonalCacheItemExpiryDays) {
 }

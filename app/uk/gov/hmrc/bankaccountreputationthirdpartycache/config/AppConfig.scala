@@ -30,6 +30,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
 
   val payeeBusinessCacheItemExpiryDays: Int = config.get[Int]("mongodb.payee.business.cacheItemExpiryDays")
   val payeePersonalCacheItemExpiryDays: Int = config.get[Int]("mongodb.payee.personal.cacheItemExpiryDays")
+  def cacheReplaceIndexes(): Boolean = config.get[Boolean]("mongodb.replaceIndexes")
 
   val basicAuthToken: String = config.get[String]("basicAuth.token")
 }
