@@ -25,7 +25,7 @@ import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import java.time.{Clock, Instant}
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +38,7 @@ abstract class CacheRepository @Inject()(
                                         )(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends PlayMongoRepository[EncryptedCacheEntry](component, collectionName, EncryptedCacheEntry.cacheFormat, Seq(
     IndexModel(ascending("key"), IndexOptions().name("uniqueKeyIndex").unique(true)),
-    IndexModel(ascending("expiryDate"), IndexOptions().name("expiryDateIndex").expireAfter(expiryDays, TimeUnit.DAYS))
+    IndexModel(ascending("lastUpdated"), IndexOptions().name("lastUpdatedIdx").expireAfter(expiryDays, TimeUnit.DAYS))
   ), replaceIndexes = appConfig.cacheReplaceIndexes()) {
 
   def findByRequest(encryptedKey: String)(implicit ec: ExecutionContext): Future[Option[String]] = {
@@ -57,7 +57,8 @@ abstract class CacheRepository @Inject()(
       EncryptedCacheEntry(
         encryptedKey,
         encryptedData,
-        Instant.now(Clock.systemUTC())),
+        Instant.now()
+      ),
       ReplaceOptions().upsert(true)
     ).toFuture()
 }
