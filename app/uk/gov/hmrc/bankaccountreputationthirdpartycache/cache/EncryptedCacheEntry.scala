@@ -23,7 +23,7 @@ import java.time.Instant
 
 case class EncryptedCacheEntry(key: String,
                                data: String,
-                               lastUpdated: Instant)
+                               expiryDate: Instant)
 
 object EncryptedCacheEntry {
 
