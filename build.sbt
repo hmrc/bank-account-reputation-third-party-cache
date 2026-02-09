@@ -2,8 +2,8 @@ import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "bank-account-reputation-third-party-cache"
 
-ThisBuild / scalaVersion        := "2.13.16"
-ThisBuild / majorVersion        := 0
+ThisBuild / majorVersion        := 1
+ThisBuild / scalaVersion        := "3.3.7"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin, BuildInfoPlugin)
@@ -12,7 +12,7 @@ lazy val microservice = Project(appName, file("."))
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(
-    scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s"
+    scalacOptions += "-Wconf:src=routes/.*:s"
   )
   .settings( // https://github.com/sbt/sbt-buildinfo
     buildInfoKeys := Seq[BuildInfoKey](version),

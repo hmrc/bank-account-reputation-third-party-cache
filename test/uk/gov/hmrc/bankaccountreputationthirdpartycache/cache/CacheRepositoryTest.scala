@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.bankaccountreputationthirdpartycache.cache
 
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
@@ -28,7 +29,7 @@ import uk.gov.hmrc.bankaccountreputationthirdpartycache.config.AppConfig
 import uk.gov.hmrc.mongo.MongoComponent
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.Random
 
 class CacheRepositoryTest extends AnyWordSpec
